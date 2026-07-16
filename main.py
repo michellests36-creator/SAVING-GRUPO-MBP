@@ -1,24 +1,46 @@
 from fastapi import FastAPI
-from supabase import create_client, Client
+from supabase import create_client
 import os
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from datetime import datetime
 
 load_dotenv()
-
-app = FastAPI(title="SAVING GRUPO MBP API")
+app = FastAPI(title="API Compras MBP")
 
 url = os.environ.get("SUPABASE_URL")
 key = os.environ.get("SUPABASE_KEY")
-supabase: Client = create_client(url, key)
+supabase = create_client(url, key)
+
+class Compra(BaseModel):
+    centro: str = "MBP RJ"
+    mes: str
+    tot_inicial: float
+    tot_desc: float
+    numero_mes: int
+    ano: int
+    usuario_id: str = "default"
 
 @app.get("/")
-def read_root():
-    return {"status": "API SAVING GRUPO MBP no ar!", "supabase": "conectado"}
+def home():
+    return {"status": "API Compras MBP no ar"}
 
-@app.get("/health")
-def health_check():
-    try:
-        data = supabase.table("_dummy").select("*").limit(1).execute()
-        return {"status": "ok", "db": "conectado"}
-    except Exception as e:
-        return {"status": "ok", "db": "erro esperado se tabela nao existe", "detalhe": str(e)}
+@app.post("/compras/criar")
+def criar(dados: Compra):
+    valor = dados.tot_inicial - dados.tot_desc
+    r = supabase.table("compras_mbp").insert({
+        "centro": dados.centro,
+        "mes": dados.mes,
+        "tot_inicial": dados.tot_inicial,
+        "tot_desc": dados.tot_desc,
+        "valor": valor,
+        "numero_mes": dados.numero_mes,
+        "ano": dados.ano,
+        "usuario_id": dados.usuario_id
+    }).execute()
+    return r.data[0]
+
+@app.get("/compras")
+def listar():
+    r = supabase.table("compras_mbp").select("*").order("id", desc=True).execute()
+    return r.data
