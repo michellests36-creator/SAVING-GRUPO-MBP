@@ -1,46 +1,56 @@
-from fastapi import FastAPI
-from supabase import create_client
 import os
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from supabase import create_client
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date
 
 load_dotenv()
-app = FastAPI(title="API Compras MBP")
 
-url = os.environ.get("SUPABASE_URL")
-key = os.environ.get("SUPABASE_KEY")
-supabase = create_client(url, key)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("Faltam SUPABASE_URL e SUPABASE_KEY no.env / Environment")
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+app = FastAPI(title="SAVING GRUPO MBP - Compras API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class Compra(BaseModel):
-    centro: str = "MBP RJ"
-    mes: str
-    tot_inicial: float
-    tot_desc: float
-    numero_mes: int
-    ano: int
-    usuario_id: str = "default"
+    data: date
+    fornecedor: str
+    documento: str | None = None
+    valor: float
+    status: str = "A Pagar"
+    categoria: str | None = None
+    forma_pagamento: str | None = None
+    centro_custo: str | None = None
+    observacao: str | None = None
 
 @app.get("/")
 def home():
-    return {"status": "API Compras MBP no ar"}
-
-@app.post("/compras/criar")
-def criar(dados: Compra):
-    valor = dados.tot_inicial - dados.tot_desc
-    r = supabase.table("compras_mbp").insert({
-        "centro": dados.centro,
-        "mes": dados.mes,
-        "tot_inicial": dados.tot_inicial,git commit -m "fix requirements limpo"
-        "tot_desc": dados.tot_desc,
-        "valor": valor,
-        "numero_mes": dados.numero_mes,
-        "ano": dados.ano,
-        "usuario_id": dados.usuario_id
-    }).execute()
-    return r.data[0]
+    return {"status": "API MBP no ar", "docs": "/docs"}
 
 @app.get("/compras")
-def listar():
-    r = supabase.table("compras_mbp").select("*").order("id", desc=True).execute()
-    return r.data
+def listar_compras():
+    resp = supabase.table("compras_mbp").select("*").order("data", desc=True).execute()
+    return resp.data
+
+@app.post("/compras")
+def criar_compra(compra: Compra):
+    dados = compra.model_dump()
+    dados["data"] = str(dados["data"])
+    try:
+        resp = supabase.table("compras_mbp").insert(dados).execute()
+        return resp.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
