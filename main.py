@@ -31,7 +31,7 @@ def criar(dados: Compra):
     r = supabase.table("compras_mbp").insert({
         "centro": dados.centro,
         "mes": dados.mes,
-        "tot_inicial": dados.tot_inicial,
+        "tot_inicial": dados.tot_inicial,git commit -m "fix requirements limpo"
         "tot_desc": dados.tot_desc,
         "valor": valor,
         "numero_mes": dados.numero_mes,
