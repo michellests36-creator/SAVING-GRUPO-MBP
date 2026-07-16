@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><title>SAVING GRUPO MBP</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-900 text-white p-6">
+<h1 class="text-2xl font-bold mb-4">💰 SAVING GRUPO MBP - Compras</h1>
+<form id="form" class="grid grid-cols-4 gap-3 bg-zinc-800 p-4 rounded mb-6">
+<input type="date" id="data" class="p-2 rounded text-black" required>
+<input id="fornecedor" placeholder="Fornecedor" class="p-2 rounded text-black" required>
+<input id="valor" type="number" step="0.01" placeholder="Valor" class="p-2 rounded text-black" required>
+<input id="status" value="A Pagar" class="p-2 rounded text-black">
+<button class="bg-emerald-500 col-span-4 p-2 rounded font-bold">Salvar Compra</button>
+</form>
+<table class="w-full bg-zinc-800 rounded"><thead><tr class="border-b border-zinc-700"><th class="p-2">Data</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+<script>
+const API="https://saving-grupo-mbp.onrender.com";
+async function load(){const r=await fetch(API+"/compras");const d=await r.json();tbody.innerHTML=d.map(x=>`<tr class='border-b border-zinc-700'><td class='p-2'>${x.data}</td><td>${x.fornecedor}</td><td>R$ ${x.valor}</td><td>${x.status}</td></tr>`).join('')}
+document.getElementById('form').onsubmit=async e=>{e.preventDefault();await fetch(API+"/compras",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:data.value,fornecedor:fornecedor.value,valor:parseFloat(valor.value),status:status.value})});load();e.target.reset()}
+load();
+</script>
+</body></html>
