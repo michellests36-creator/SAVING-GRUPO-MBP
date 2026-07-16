@@ -1,23 +1,98 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-<meta charset="UTF-8"><title>SAVING GRUPO MBP</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAVING GRUPO MBP</title>
+<style>
+:root{
+  --bg:#121212; --card:#1e1e1e; --card2:#2a2a2a; --text:#f1f1f1; --muted:#aaa;
+  --input:#2b2b2b; --border:#333; --primary:#10b981;
+}
+[data-theme="light"]{
+  --bg:#f5f5f7; --card:#ffffff; --card2:#f0f0f0; --text:#111; --muted:#666;
+  --input:#ffffff; --border:#ddd; --primary:#059669;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui}
+body{background:var(--bg);color:var(--text);transition:.2s}
+
+/* BARRA FIXA */
+.topbar{
+  position:sticky; top:0; z-index:1000;
+  background:var(--card); border-bottom:1px solid var(--border);
+  padding:14px 20px; display:flex; justify-content:space-between; align-items:center;
+  backdrop-filter:blur(10px);
+}
+.topbar h1{font-size:18px}
+.actions{display:flex;gap:10px;align-items:center}
+.btn-theme{
+  border:1px solid var(--border); background:var(--card2); color:var(--text);
+  padding:8px 12px; border-radius:8px; cursor:pointer;
+}
+.container{max-width:1400px;margin:20px auto;padding:0 16px}
+.form-card{
+  background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px;
+  display:grid; grid-template-columns:150px 1fr 150px 150px; gap:10px;
+  position:sticky; top:64px; z-index:900;
+}
+.form-card input, .form-card select{
+  background:var(--input); color:var(--text); border:1px solid var(--border);
+  padding:10px; border-radius:8px; outline:none;
+}
+.btn-save{
+  grid-column:1/-1; background:var(--primary); color:#fff; border:0;
+  padding:12px; border-radius:8px; font-weight:700; cursor:pointer;
+}
+.table-card{background:var(--card); border:1px solid var(--border); border-radius:12px; margin-top:16px; overflow:hidden}
+table{width:100%; border-collapse:collapse}
+th{background:var(--card2); padding:10px; font-size:13px; text-align:left; color:var(--muted)}
+td{padding:10px; border-top:1px solid var(--border); font-size:14px}
+@media(max-width:900px){.form-card{grid-template-columns:1fr 1fr}}
+</style>
 </head>
-<body class="bg-zinc-900 text-white p-6">
-<h1 class="text-2xl font-bold mb-4">💰 SAVING GRUPO MBP - Compras</h1>
-<form id="form" class="grid grid-cols-4 gap-3 bg-zinc-800 p-4 rounded mb-6">
-<input type="date" id="data" class="p-2 rounded text-black" required>
-<input id="fornecedor" placeholder="Fornecedor" class="p-2 rounded text-black" required>
-<input id="valor" type="number" step="0.01" placeholder="Valor" class="p-2 rounded text-black" required>
-<input id="status" value="A Pagar" class="p-2 rounded text-black">
-<button class="bg-emerald-500 col-span-4 p-2 rounded font-bold">Salvar Compra</button>
-</form>
-<table class="w-full bg-zinc-800 rounded"><thead><tr class="border-b border-zinc-700"><th class="p-2">Data</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+<body data-theme="dark">
+<div class="topbar">
+  <h1>💰 SAVING GRUPO MBP - Compras</h1>
+  <div class="actions">
+    <button class="btn-theme" onclick="toggleTheme()">🌙 / ☀️ Tema</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="form-card">
+    <input id="data" type="date">
+    <input id="fornecedor" placeholder="Fornecedor">
+    <input id="valor" type="number" step="0.01" placeholder="Valor">
+    <select id="status"><option>A Pagar</option><option>Pago</option></select>
+    <button class="btn-save" onclick="salvar()">Salvar Compra</button>
+  </div>
+
+  <div class="table-card">
+    <table><thead><tr><th>Data</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+  </div>
+</div>
+
 <script>
-const API="https://saving-grupo-mbp.onrender.com";
-async function load(){const r=await fetch(API+"/compras");const d=await r.json();tbody.innerHTML=d.map(x=>`<tr class='border-b border-zinc-700'><td class='p-2'>${x.data}</td><td>${x.fornecedor}</td><td>R$ ${x.valor}</td><td>${x.status}</td></tr>`).join('')}
-document.getElementById('form').onsubmit=async e=>{e.preventDefault();await fetch(API+"/compras",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:data.value,fornecedor:fornecedor.value,valor:parseFloat(valor.value),status:status.value})});load();e.target.reset()}
-load();
+const API = location.origin;
+function toggleTheme(){
+  const cur = document.body.getAttribute('data-theme');
+  const next = cur==='dark'?'light':'dark';
+  document.body.setAttribute('data-theme',next);
+  localStorage.setItem('theme',next);
+}
+(function(){ const t=localStorage.getItem('theme'); if(t) document.body.setAttribute('data-theme',t); })();
+
+async function carregar(){
+  const r = await fetch(`${API}/compras`); const dados = await r.json();
+  tbody.innerHTML = dados.map(c=>`<tr><td>${c.data}</td><td>${c.fornecedor}</td><td>R$ ${Number(c.valor).toFixed(2)}</td><td>${c.status}</td></tr>`).join('');
+}
+async function salvar(){
+  const body={data:data.value, fornecedor:fornecedor.value, valor:parseFloat(valor.value), status:status.value};
+  if(!body.data||!body.fornecedor||!body.valor){alert('Preencha tudo');return}
+  await fetch(`${API}/compras`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  fornecedor.value=''; valor.value=''; carregar();
+}
+carregar();
 </script>
-</body></html>
+</body>
+</html>
