@@ -1,97 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAVING GRUPO MBP</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRUPO MBP | Compras</title>
 <style>
-:root{
-  --bg:#121212; --card:#1e1e1e; --card2:#2a2a2a; --text:#f1f1f1; --muted:#aaa;
-  --input:#2b2b2b; --border:#333; --primary:#10b981;
-}
-[data-theme="light"]{
-  --bg:#f5f5f7; --card:#ffffff; --card2:#f0f0f0; --text:#111; --muted:#666;
-  --input:#ffffff; --border:#ddd; --primary:#059669;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:Inter,system-ui}
-body{background:var(--bg);color:var(--text);transition:.2s}
-
-/* BARRA FIXA */
-.topbar{
-  position:sticky; top:0; z-index:1000;
-  background:var(--card); border-bottom:1px solid var(--border);
-  padding:14px 20px; display:flex; justify-content:space-between; align-items:center;
-  backdrop-filter:blur(10px);
-}
-.topbar h1{font-size:18px}
-.actions{display:flex;gap:10px;align-items:center}
-.btn-theme{
-  border:1px solid var(--border); background:var(--card2); color:var(--text);
-  padding:8px 12px; border-radius:8px; cursor:pointer;
-}
-.container{max-width:1400px;margin:20px auto;padding:0 16px}
-.form-card{
-  background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px;
-  display:grid; grid-template-columns:150px 1fr 150px 150px; gap:10px;
-  position:sticky; top:64px; z-index:900;
-}
-.form-card input, .form-card select{
-  background:var(--input); color:var(--text); border:1px solid var(--border);
-  padding:10px; border-radius:8px; outline:none;
-}
-.btn-save{
-  grid-column:1/-1; background:var(--primary); color:#fff; border:0;
-  padding:12px; border-radius:8px; font-weight:700; cursor:pointer;
-}
-.table-card{background:var(--card); border:1px solid var(--border); border-radius:12px; margin-top:16px; overflow:hidden}
-table{width:100%; border-collapse:collapse}
-th{background:var(--card2); padding:10px; font-size:13px; text-align:left; color:var(--muted)}
-td{padding:10px; border-top:1px solid var(--border); font-size:14px}
-@media(max-width:900px){.form-card{grid-template-columns:1fr 1fr}}
+:root{--bg:#0f1115;--card:#1e232f;--input:#12151d;--border:#2b3242;--text:#e5e7eb;--muted:#94a3b8;--orange:#f59e0b;--green:#10b981}
+[data-theme="light"]{--bg:#eef1f6;--card:#ffffff;--input:#ffffff;--border:#d8dde8;--text:#0f172a;--muted:#64748b}
+*{box-sizing:border-box;font-family:Inter,Arial} body{margin:0;background:var(--bg);color:var(--text)}
+.topbar{position:sticky;top:0;z-index:1000;background:#1e293b;color:#fff;border-top:3px solid var(--orange);padding:14px 20px;display:flex;justify-content:space-between}
+.topbar small{color:#94a3b8;display:block;font-size:11px;margin-top:3px}.topbar.conn{color:var(--orange);font-size:13px;margin-top:8px}
+.btn-theme{border:1px solid #334155;background:#0f172a;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+.wrap{max-width:1400px;margin:18px auto;padding:0 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.grid4{display:grid;grid-template-columns:160px 1fr 220px 160px;gap:10px}
+.grid5{display:grid;grid-template-columns:1.8fr 140px 140px 140px 1fr;gap:10px;margin-top:10px}
+input,select,textarea{width:100%;padding:11px;border-radius:8px;border:1px solid var(--border);background:var(--input);color:var(--text);outline:none}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase}
+.btn{background:var(--green);color:#fff;border:0;padding:13px;border-radius:10px;width:100%;font-weight:800;margin-top:12px;cursor:pointer}
+table{width:100%;border-collapse:collapse} th{color:var(--muted);font-size:11px;text-align:left;padding:10px;border-bottom:1px solid var(--border)} td{padding:10px;font-size:13px;border-bottom:1px solid var(--border)}
 </style>
 </head>
 <body data-theme="dark">
 <div class="topbar">
-  <h1>💰 SAVING GRUPO MBP - Compras</h1>
-  <div class="actions">
-    <button class="btn-theme" onclick="toggleTheme()">🌙 / ☀️ Tema</button>
-  </div>
+  <div><strong>GRUPO MBP | METALÚRGICA</strong><small>© Portal Integrado de Homologação de Produtos & Monitoramento de Prospecção de Fornecedores</small><div class="conn">Conectado como: <b>compras</b></div></div>
+  <div><button class="btn-theme" onclick="toggle()">🌙 / ☀️</button></div>
 </div>
-
-<div class="container">
-  <div class="form-card">
-    <input id="data" type="date">
-    <input id="fornecedor" placeholder="Fornecedor">
-    <input id="valor" type="number" step="0.01" placeholder="Valor">
-    <select id="status"><option>A Pagar</option><option>Pago</option></select>
-    <button class="btn-save" onclick="salvar()">Salvar Compra</button>
+<div class="wrap">
+<div class="card">
+  <div class="grid4">
+    <div><label>Data</label><input id="data" type="date"></div>
+    <div><label>Fornecedor</label><input id="fornecedor" placeholder="Nome do fornecedor"></div>
+    <div><label>Centro de Custo</label><select id="centro"><option value="">Selecione...</option><option value="1411|MBP NORDESTE - 1411">1411 - MBP NORDESTE</option><option value="1400|MBP PARTICIPAÇÕES - 1400">1400 - MBP PARTICIPAÇÕES</option><option value="1410|MBP RJ - 1410">1410 - MBP RJ</option><option value="1422|MVAL ARAQUARI - 1422">1422 - MVAL ARAQUARI</option><option value="1420|MVAL BP - 1420">1420 - MVAL BP</option><option value="1421|MVAL FILIAL - 1421">1421 - MVAL FILIAL</option></select></div>
+    <div><label>Nome do Comprador</label><select id="comprador"><option>Michelle</option><option>Compras</option><option>Financeiro</option><option>Diretoria</option></select></div>
   </div>
-
-  <div class="table-card">
-    <table><thead><tr><th>Data</th><th>Fornecedor</th><th>Valor</th><th>Status</th></tr></thead><tbody id="tbody"></tbody></table>
+  <div class="grid5">
+    <div><label>Descrição do Material</label><input id="descricao" placeholder="Ex: Parafuso M8, Chapa 2mm"></div>
+    <div><label>Total Inicial R$</label><input id="inicial" type="number" step="0.01" oninput="calc()"></div>
+    <div><label>Total Desconto R$</label><input id="desconto" type="number" step="0.01" value="0" oninput="calc()"></div>
+    <div><label>Total Final R$</label><input id="final" type="number" readonly style="background:#10b981;color:#fff;font-weight:bold"></div>
+    <div><label>Status</label><select id="status"><option>A Pagar</option><option>Pago</option><option>Vencido</option></select></div>
   </div>
+  <div style="margin-top:10px"><label>Observação / Documento</label><input id="obs" placeholder="Nº NF, observações"></div>
+  <button class="btn" onclick="salvar()">Salvar Compra</button>
 </div>
-
+<div class="card"><table><thead><tr><th>Data</th><th>Fornecedor</th><th>Centro</th><th>Descrição</th><th>Comprador</th><th>Total Final</th><th>Status</th></tr></thead><tbody id="lista"></tbody></table></div>
+</div>
 <script>
-const API = location.origin;
-function toggleTheme(){
-  const cur = document.body.getAttribute('data-theme');
-  const next = cur==='dark'?'light':'dark';
-  document.body.setAttribute('data-theme',next);
-  localStorage.setItem('theme',next);
-}
-(function(){ const t=localStorage.getItem('theme'); if(t) document.body.setAttribute('data-theme',t); })();
-
-async function carregar(){
-  const r = await fetch(`${API}/compras`); const dados = await r.json();
-  tbody.innerHTML = dados.map(c=>`<tr><td>${c.data}</td><td>${c.fornecedor}</td><td>R$ ${Number(c.valor).toFixed(2)}</td><td>${c.status}</td></tr>`).join('');
-}
-async function salvar(){
-  const body={data:data.value, fornecedor:fornecedor.value, valor:parseFloat(valor.value), status:status.value};
-  if(!body.data||!body.fornecedor||!body.valor){alert('Preencha tudo');return}
-  await fetch(`${API}/compras`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-  fornecedor.value=''; valor.value=''; carregar();
-}
+const API=location.origin;
+function toggle(){let c=document.body.getAttribute('data-theme');let n=c==='dark'?'light':'dark';document.body.setAttribute('data-theme',n);localStorage.setItem('th',n)}
+(function(){let t=localStorage.getItem('th');if(t)document.body.setAttribute('data-theme',t)})();
+function calc(){let i=parseFloat(inicial.value)||0;let d=parseFloat(desconto.value)||0;final.value=(i-d).toFixed(2)}
+async function salvar(){let cc=centro.value.split('|');if(!cc[0])return alert('Escolha o centro');let b={data:data.value,fornecedor:fornecedor.value,descricao_material:descricao.value,valor_inicial:parseFloat(inicial.value),desconto:parseFloat(desconto.value)||0,valor_final:parseFloat(final.value),centro_custo_codigo:cc[0],centro_custo_nome:cc[1],comprador:comprador.value,status:status.value,observacao:obs.value,documento:obs.value};if(!b.data||!b.fornecedor||!b.descricao_material||!b.valor_final)return alert('Preencha Data, Fornecedor, Descrição e Totais');let r=await fetch(API+'/compras',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});if(r.ok){alert('Salvo!');carregar()}else{let e=await r.text();alert('Erro:'+e)}}
+async function carregar(){let j=await(await fetch(API+'/compras')).json();lista.innerHTML=j.map(c=>`<tr><td>${c.data}</td><td>${c.fornecedor}</td><td>${c.centro_custo_codigo}</td><td>${c.descricao_material}</td><td>${c.comprador}</td><td>R$ ${Number(c.valor_final).toFixed(2)}</td><td>${c.status}</td></tr>`).join('')}
 carregar();
 </script>
 </body>
