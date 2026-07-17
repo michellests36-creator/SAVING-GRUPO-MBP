@@ -23,11 +23,8 @@ class Compra(BaseModel):
     centro_custo_codigo: str
     centro_custo_nome: str
     comprador: str
-    status: str
     observacao: Optional[str] = ""
     documento: Optional[str] = ""
-    # aceita 'valor' se vier, pra não dar erro
-    valor: Optional[float] = None
 
 @app.get("/compras")
 def listar():
@@ -36,8 +33,19 @@ def listar():
 @app.post("/compras")
 def criar(c: Compra):
     d = c.model_dump()
-    d["valor"] = d["valor_final"] # cria o campo que sua tabela antiga exige
-    return supabase.table("compras").insert(d).execute().data[0]
+    d["valor"] = d["valor_final"]
+    d["status"] = "Lançado" # só pra não quebrar sua tabela antiga que exige status
+    try:
+        return supabase.table("compras").insert(d).execute().data[0]
+    except:
+        simples = {
+            "data": d["data"],
+            "fornecedor": d["fornecedor"],
+            "valor": d["valor_final"],
+            "status": "Lançado",
+            "observacao": f"{d['descricao_material']} | {d['centro_custo_codigo']} | {d['comprador']}"
+        }
+        return supabase.table("compras").insert(simples).execute().data[0]
 
 @app.get("/")
 def home():
