@@ -4,22 +4,31 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
-app=FastAPI()
-app.add_middleware(CORSMiddleware,allow_origins=["*"],allow_methods=["*"],allow_headers=["*"])
-URL=os.getenv("SUPABASE_URL","").strip().strip('"').strip("'")
-KEY=os.getenv("SUPABASE_KEY","").strip().strip('"').strip("'")
-supabase=None
-try:
- from supabase import create_client
- if URL.startswith("https://"): supabase=create_client(URL,KEY)
-except Exception as e: print(e)
+
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+
+URL = os.getenv("SUPABASE_URL","").strip().strip('"').strip("'")
+KEY = os.getenv("SUPABASE_KEY","").strip().strip('"').strip("'")
+from supabase import create_client
+supabase = create_client(URL, KEY)
+
 class Compra(BaseModel):
- data:date; fornecedor:str; descricao_material:str; valor_inicial:float; desconto:float=0; valor_final:float
- centro_custo_codigo:str; centro_custo_nome:str; comprador:str; status:str="A Pagar"; documento:Optional[str]=None; observacao:Optional[str]=None
+    data: str
+    fornecedor: str
+    valor: float
+    status: str
+    # vou salvar tudo que é novo dentro da observação pra não precisar criar coluna
+    observacao: str
+
 @app.get("/compras")
-def listar(): return supabase.table("compras_mbp").select("*").order("data",desc=True).execute().data if supabase else []
+def listar():
+    return supabase.table("compras").select("*").order("data", desc=True).execute().data
+
 @app.post("/compras")
-def criar(c:Compra): d=c.model_dump(); d["data"]=str(d["data"]); return supabase.table("compras_mbp").insert(d).execute().data[0]
+def criar(c: Compra):
+    return supabase.table("compras").insert(c.model_dump()).execute().data[0]
+
 @app.get("/")
-def home(): return FileResponse("index.html")
+def home():
+    return FileResponse("index.html")
