@@ -1,9 +1,10 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional
+import traceback
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -16,43 +17,51 @@ supabase = create_client(URL, KEY)
 class CompraIn(BaseModel):
     data: str
     fornecedor: str
-    descricao_material: str
-    valor_inicial: float
+    descricao_material: Optional[str] = ""
+    descricao: Optional[str] = ""
+    valor_inicial: float = 0
     desconto: float = 0
-    valor_final: float
-    centro_custo_codigo: str
-    centro_custo_nome: str
-    comprador: str
+    valor_final: float = 0
+    total: float = 0
+    centro_custo_codigo: Optional[str] = "1410"
+    codigo_centro: Optional[str] = "1410"
+    centro_custo_nome: Optional[str] = "1410 - MBP RJ"
+    centro_de_custo: Optional[str] = "1410 - MBP RJ"
+    comprador: str = "Michelle"
     observacao: Optional[str] = ""
     documento: Optional[str] = ""
 
 @app.get("/compras")
 def listar():
-    rows = supabase.table("compras").select("*").order("data", desc=True).execute().data
-    out=[]
-    for r in rows:
-        out.append({
-            "data": r.get("data"),
-            "fornecedor": r.get("fornecedor"),
-            "centro_custo_codigo": r.get("centro_custo_codigo") or "1410",
-            "descricao_material": r.get("descricao_material") or r.get("observacao") or "",
-            "comprador": r.get("comprador") or "Michelle",
-            "valor_final": r.get("valor_final") or r.get("valor") or 0,
-            "valor": r.get("valor") or 0
-        })
-    return out
+    try:
+        rows = supabase.table("compras").select("*").order("data", desc=True).limit(100).execute().data
+        return rows
+    except Exception as e:
+        return JSONResponse(status_code=200, content=[])
 
 @app.post("/compras")
 def criar(c: CompraIn):
-    payload = {
-        "data": c.data,
-        "fornecedor": c.fornecedor,
-        "valor": float(c.valor_final),
-        "status": "Lançado",
-        "observacao": f"{c.descricao_material} | CENTRO:{c.centro_custo_codigo} | COMPRADOR:{c.comprador} | INI:{c.valor_inicial} DESC:{c.desconto} FINAL:{c.valor_final}"
-    }
-    result = supabase.table("compras").insert(payload).execute()
-    return result.data[0]
+    try:
+        d = c.model_dump()
+        desc_final = d.get("descricao_material") or d.get("descricao") or ""
+        centro_cod = d.get("centro_custo_codigo") or d.get("codigo_centro") or "1410"
+        centro_nome = d.get("centro_custo_nome") or d.get("centro_de_custo") or ""
+        comprador = d.get("comprador") or "Michelle"
+        v_final = d.get("valor_final") or d.get("total") or d.get("valor_inicial") or 0
+
+        # Payload MINIMO que sua tabela compras COM CERTEZA tem
+        payload = {
+            "data": d.get("data"),
+            "fornecedor": d.get("fornecedor"),
+            "valor": float(v_final),
+            "status": "Lançado",
+            "observacao": f"{desc_final} | CENTRO:{centro_cod} {centro_nome} | COMP:{comprador} | INI:{d.get('valor_inicial')} DESC:{d.get('desconto')} | OBS:{d.get('observacao')} DOC:{d.get('documento')}"
+        }
+        res = supabase.table("compras").insert(payload).execute()
+        return res.data[0]
+    except Exception as e:
+        print(traceback.format_exc())
+        return JSONResponse(status_code=400, content={"erro": str(e), "detalhe": traceback.format_exc()})
 
 @app.get("/")
 def home():

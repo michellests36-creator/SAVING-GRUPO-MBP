@@ -1,33 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><title>GRUPO MBP</title>
-<style>body{background:#0f172a;color:#fff;font-family:Arial;padding:20px}.card{background:#1e293b;padding:20px;border-radius:12px}label{font-size:11px;color:#94a3b8;display:block;margin-bottom:4px}input,select{width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;box-sizing:border-box}.grid{display:grid;grid-template-columns:1fr 2fr 1fr 1fr 1fr;gap:12px}.grid2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;margin-top:12px}button{width:100%;padding:14px;background:#16a34a;border:0;border-radius:10px;color:#fff;font-weight:bold;margin-top:16px}table{width:100%;margin-top:10px}th{color:#94a3b8;font-size:12px;text-align:left}td{padding:8px;border-top:1px solid #1e293b}</style>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GRUPO MBP | METALÚRGICA</title>
+<style>
+body{background:#0f172a;color:#fff;font-family:Inter,Arial;padding:18px}
+.card{background:#1e293b;padding:18px;border-radius:14px}
+label{font-size:10px;color:#94a3b8;letter-spacing:.5px;display:block;margin-bottom:5px}
+input,select{width:100%;padding:11px;border-radius:9px;border:1px solid #334155;background:#0f172a;color:#fff;box-sizing:border-box}
+input[type="date"]{color-scheme:dark}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(1);cursor:pointer;opacity:.8}
+.grid{display:grid;grid-template-columns:140px 1fr 130px 130px 140px;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 110px 170px 160px;gap:10px;margin-top:12px}
+button{width:100%;padding:14px;background:#16a34a;border:0;border-radius:10px;color:#fff;font-weight:800;margin-top:14px;cursor:pointer}
+table{width:100%;border-collapse:collapse;margin-top:16px}
+th{color:#64748b;font-size:11px;text-align:left;padding:8px;text-transform:uppercase}
+td{padding:9px;border-top:1px solid #1e293b;font-size:13px}
+</style>
 </head>
 <body>
-<h3>GRUPO MBP | METALURGICA</h3>
+<h3 style="margin:0">GRUPO MBP | METALÚRGICA</h3>
+<p style="color:#64748b;font-size:12px;margin:4px 0 14px">Conectado como: <b style="color:#94a3b8">compras</b></p>
 <div class="card">
-<div class="grid">
-<div><label>DATA</label><input type="date" id="data"></div>
-<div><label>FORNECEDOR</label><input id="fornecedor"></div>
-<div><label>VALOR INICIAL</label><input type="number" id="valor_inicial" oninput="calc()"></div>
-<div><label>DESCONTO</label><input type="number" id="desconto" oninput="calc()"></div>
-<div><label>TOTAL FINAL</label><input type="number" id="valor_final" readonly style="background:#16a34a"></div>
+  <div class="grid">
+    <div><label>DATA</label><input type="date" id="data"></div>
+    <div><label>FORNECEDOR</label><input id="fornecedor" placeholder="Ex: R.R.P. PEIXES LTDA"></div>
+    <div><label>VALOR INICIAL R$</label><input type="number" id="valor_inicial" oninput="calc()" placeholder="0"></div>
+    <div><label>DESCONTO R$</label><input type="number" id="desconto" oninput="calc()" placeholder="0"></div>
+    <div><label>TOTAL FINAL R$</label><input type="text" id="valor_final" readonly style="background:#15803d;font-weight:700"></div>
+  </div>
+  <div class="grid2">
+    <div><label>DESCRIÇÃO DO MATERIAL</label><input id="descricao" placeholder="Ex: MADEIRA"></div>
+    <div><label>CÓDIGO CENTRO</label><input id="codigo_centro" value="1410"></div>
+    <div><label>CENTRO DE CUSTO</label><select id="centro_nome"><option>1410 - MBP RJ</option><option>1000 - MBP SP</option><option>1200 - MBP MG</option></select></div>
+    <div><label>NOME DO COMPRADOR</label><select id="comprador"><option>Michelle</option><option>Carlos</option><option>Outro</option></select></div>
+  </div>
+  <div style="margin-top:12px"><label>OBSERVAÇÃO / DOCUMENTO</label><input id="obs" placeholder="Nº NF, observação"></div>
+  <button onclick="salvar()">Salvar Compra</button>
+  <p id="msg" style="font-size:12px;margin-top:8px;color:#94a3b8"></p>
 </div>
-<div class="grid2">
-<div><label>DESCRICAO</label><input id="descricao"></div>
-<div><label>CODIGO CENTRO</label><input id="centro_codigo" value="1410"></div>
-<div><label>CENTRO DE CUSTO</label><select id="centro_nome"><option>1410 - MBP RJ</option><option>1000 - MBP SP</option></select></div>
-<div><label>COMPRADOR</label><select id="comprador"><option>Michelle</option><option>Carlos</option></select></div>
-</div>
-<div style="margin-top:12px"><label>OBSERVACAO</label><input id="obs"></div>
-<button onclick="salvar()">Salvar Compra</button>
-</div>
-<table><thead><tr><th>Data</th><th>Fornecedor</th><th>Centro</th><th>Descricao</th><th>Comprador</th><th>Total</th></tr></thead><tbody id="tbody"></tbody></table>
+<table><thead><tr><th>Data</th><th>Fornecedor</th><th>Centro</th><th>Descrição</th><th>Comprador</th><th>Total</th></tr></thead><tbody id="tbody"></tbody></table>
 <script>
-function calc(){let i=parseFloat(document.getElementById('valor_inicial').value)||0;let d=parseFloat(document.getElementById('desconto').value)||0;document.getElementById('valor_final').value=(i-d).toFixed(2)}
-async function salvar(){const p={data:document.getElementById('data').value,fornecedor:document.getElementById('fornecedor').value,descricao_material:document.getElementById('descricao').value,valor_inicial:parseFloat(document.getElementById('valor_inicial').value)||0,desconto:parseFloat(document.getElementById('desconto').value)||0,valor_final:parseFloat(document.getElementById('valor_final').value)||0,centro_custo_codigo:document.getElementById('centro_codigo').value,centro_custo_nome:document.getElementById('centro_nome').value,comprador:document.getElementById('comprador').value,observacao:document.getElementById('obs').value,documento:document.getElementById('obs').value};let r=await fetch('/compras',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});if(!r.ok){alert(await r.text());return}alert('Salvo!');load()}
-async function load(){let r=await fetch('/compras');let d=await r.json();document.getElementById('tbody').innerHTML=d.map(c=>`<tr><td>${c.data||''}</td><td>${c.fornecedor||''}</td><td>${c.centro_custo_codigo||''}</td><td>${c.descricao_material||''}</td><td>${c.comprador||''}</td><td>R$ ${c.valor_final||c.valor||0}</td></tr>`).join('')}
-load();document.getElementById('data').valueAsDate=new Date()
+function calc(){
+ let ini=parseFloat(document.getElementById('valor_inicial').value)||0
+ let des=parseFloat(document.getElementById('desconto').value)||0
+ document.getElementById('valor_final').value=(ini-des).toFixed(2)
+}
+async function salvar(){
+ const data=document.getElementById('data').value
+ const fornecedor=document.getElementById('fornecedor').value
+ const descricao=document.getElementById('descricao').value
+ const payload={
+   data, fornecedor, descricao_material:descricao, descricao,
+   valor_inicial:parseFloat(document.getElementById('valor_inicial').value)||0,
+   desconto:parseFloat(document.getElementById('desconto').value)||0,
+   valor_final:parseFloat(document.getElementById('valor_final').value)||0,
+   total:parseFloat(document.getElementById('valor_final').value)||0,
+   centro_custo_codigo:document.getElementById('codigo_centro').value,
+   codigo_centro:document.getElementById('codigo_centro').value,
+   centro_custo_nome:document.getElementById('centro_nome').value,
+   centro_de_custo:document.getElementById('centro_nome').value,
+   comprador:document.getElementById('comprador').value,
+   observacao:document.getElementById('obs').value,
+   documento:document.getElementById('obs').value
+ }
+ if(!data||!fornecedor||!descricao){alert('Preencha DATA, FORNECEDOR e DESCRIÇÃO');return}
+ document.getElementById('msg').innerText='Salvando...'
+ try{
+  let r=await fetch('/compras',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  let t=await r.text()
+  if(!r.ok){document.getElementById('msg').innerText='Erro: '+t; alert('Erro ao salvar:\n'+t); return}
+  document.getElementById('msg').innerText='Salvo com sucesso!'
+  load()
+ }catch(e){alert('Erro de conexão: '+e)}
+}
+async function load(){
+ let r=await fetch('/compras'); let d=await r.json()
+ document.getElementById('tbody').innerHTML=d.map(c=>`<tr><td>${c.data||''}</td><td>${c.fornecedor||''}</td><td>${(c.observacao||'').substring(0,20)}</td><td>${(c.observacao||c.descricao_material||'').split('|')[0]}</td><td>Michelle</td><td>R$ ${c.valor||c.valor_final||0}</td></tr>`).join('')
+}
+document.getElementById('data').valueAsDate=new Date()
+load()
 </script>
 </body>
 </html>
