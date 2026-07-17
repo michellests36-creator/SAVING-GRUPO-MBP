@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from datetime import date
+from typing import Optional
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -16,10 +16,18 @@ supabase = create_client(URL, KEY)
 class Compra(BaseModel):
     data: str
     fornecedor: str
-    valor: float
+    descricao_material: str
+    valor_inicial: float
+    desconto: float = 0
+    valor_final: float
+    centro_custo_codigo: str
+    centro_custo_nome: str
+    comprador: str
     status: str
-    # vou salvar tudo que é novo dentro da observação pra não precisar criar coluna
-    observacao: str
+    observacao: Optional[str] = ""
+    documento: Optional[str] = ""
+    # aceita 'valor' se vier, pra não dar erro
+    valor: Optional[float] = None
 
 @app.get("/compras")
 def listar():
@@ -27,7 +35,9 @@ def listar():
 
 @app.post("/compras")
 def criar(c: Compra):
-    return supabase.table("compras").insert(c.model_dump()).execute().data[0]
+    d = c.model_dump()
+    d["valor"] = d["valor_final"] # cria o campo que sua tabela antiga exige
+    return supabase.table("compras").insert(d).execute().data[0]
 
 @app.get("/")
 def home():
