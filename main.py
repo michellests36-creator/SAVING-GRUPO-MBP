@@ -171,19 +171,11 @@ def criar(c: CompraIn):
             "mensagem": "Compra cadastrada com sucesso.",
         }
 
-    # 42501 = "row-level security policy" violada no Postgres/Supabase.
-    # É o erro mais comum aqui: normalmente falta política de INSERT
-    # na tabela "compras" ou a SUPABASE_KEY usada é a anon key sem
-    # permissão (o correto para uso server-side é a service_role key).
-    status_code = 403 if erro and "42501" in erro else 400
-
-    corpo_erro = {"erro": "Não foi possível salvar a compra."}
-    if DEBUG:
-        corpo_erro["detalhe"] = erro
-        corpo_erro["payload_enviado"] = dados_novo_registro
-
-    raise HTTPException(status_code=status_code, detail=corpo_erro)
-
+    # FORÇA a exibição do erro real retornado pelo Supabase na tela do navegador
+    raise HTTPException(
+        status_code=400,
+        detail={"erro": "Erro ao salvar no banco", "detalhe_real": erro, "payload": dados_novo_registro}
+    )
 
 # ===================================================
 # PÁGINA INICIAL
